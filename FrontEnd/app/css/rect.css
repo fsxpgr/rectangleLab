@@ -1,0 +1,92 @@
+.map-card {
+    height: 100vh;
+}
+.map-card > .card-content {
+    padding: 0px;
+}
+.map-card-map {
+    height: calc(100vh - 85px);
+}
+.map-card-map > .card-content {
+    padding: 0px;
+}
+.no-margin {
+    margin: 0 !important;
+}
+.collection-map {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    height: calc(100vh - 190px) !important;
+}
+.map-col {
+    padding: 0 0px !important;
+}
+.map-col > .col {
+    padding: 0px 0px 0px 5px !important;
+}
+
+label {
+    height: 5px !important;
+}
+
+.map-row {
+    border-bottom: 1px solid #d0d0d0;
+}
+.map-row-prop {
+    border-bottom: 1px solid #d0d0d0;
+    margin-bottom: 5px;
+}
+.head {
+    font-size: 17px;
+    font-weight: bold;
+}
+
+.inner-prop {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    height: calc(100vh - 130px) !important;
+}
+
+.goToHis {
+    padding: 0 1rem;
+    margin: 3px 5px !important;
+    text-align: center;
+    display: inline-block;
+}
+
+.card {
+    margin: 0;
+}
+
+.btn-wrapper {
+    display: block;
+    text-align: center;
+}
+
+.col {
+    margin: 0;
+    padding: 0;
+}
+
+input {
+    margin: 0 !important;
+}
+
+.background {
+    /* background-color	Specifies the background color to be used	1
+    background-image	Specifies ONE or MORE background images to be used	1
+    background-position	Specifies the position of the background images	1
+    background-size	Specifies the size of the background images	3
+    background-repeat	Specifies how to repeat the background images	1
+    background-origin	Specifies the positioning area of the background images	3
+    background-clip	Specifies the painting area of the background images	3
+    background-attachment */
+    background-image:url("http://bgfons.com/uploads/notebook/notebook_texture2463.jpg");
+    height: 100%;
+    width: 100%;
+    position: fixed;
+}
+.center {
+    padding: 15px;
+    margin: 0;
+}

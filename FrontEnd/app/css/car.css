@@ -1,0 +1,24 @@
+.min-height {
+    height: calc(100vh - 160px);
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+}
+
+.active {
+    z-index: 99999999 !important;
+}
+
+.input-field {
+    margin-top: 0rem;
+}
+
+.car-label {
+    padding-left: 10px;
+}
+
+.car-card {
+    margin: 0;
+}
+.car-card > .card-content {
+    padding: 5px;
+}

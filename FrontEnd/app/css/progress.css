@@ -1,0 +1,11 @@
+.progress {
+    position: absolute;
+    height: 7px;
+    display: block;
+    width: 100%;
+    background-color: #acece6;
+    border-radius: 2px;
+    margin: 0;
+    overflow: hidden;
+    z-index: 999;
+}

@@ -1,0 +1,17 @@
+.center {
+    text-align: center;
+}
+
+.inline {
+    display: inline-block;
+}
+
+.button a {
+    color: white;
+}
+.main_width {
+    width: 180px;
+}
+.btn {
+    margin: 10px;
+}
