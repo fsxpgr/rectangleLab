@@ -73,6 +73,7 @@ input {
 }
 
 .background {
+    padding: 0px !important;
     /* background-color	Specifies the background color to be used	1
     background-image	Specifies ONE or MORE background images to be used	1
     background-position	Specifies the position of the background images	1

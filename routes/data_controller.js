@@ -18,7 +18,7 @@ router.get('/rect', (req, res) => {
         sizeX: getRandomInt(50, 300),
         color_body: getRandomRGB(),
         color_frame: getRandomRGB(),
-        posX: getRandomInt(-150, 150),
+        posX: getRandomInt(-200, 200),
         posY: getRandomInt(-150, 150),
         orientation: getRandomInt(0, 360)
     });

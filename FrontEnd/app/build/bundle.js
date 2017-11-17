@@ -37850,26 +37850,33 @@ var Rect = exports.Rect = function (_React$Component) {
         var _this = _possibleConstructorReturn(this, (Rect.__proto__ || Object.getPrototypeOf(Rect)).call(this, props));
 
         _this.state = {
-            prop: {
-                posX: '',
-                posY: '',
-                sizeX: '',
-                sizeY: '',
-                color_body: '',
-                color_frame: '',
-                orientation: ''
-            }
+            prop: [],
+            editable: []
         };
         _this.handleChange = _this.handleChange.bind(_this);
+        _this.click = _this.click.bind(_this);
+        _this.down = _this.down.bind(_this);
         return _this;
     }
 
     _createClass(Rect, [{
+        key: 'click',
+        value: function click(i) {
+            var temp = this.state.prop[i];
+            temp.zIndex = "999999999" + i;
+            this.setState({ temp: temp });
+            this.setState({ editable: temp });
+
+            var ss = this.state.prop[i];
+            ss["zIndex"] = 99999;
+            this.setState({ prop: ss });
+        }
+    }, {
         key: 'handleChange',
         value: function handleChange(e, state) {
-            var ss = this.state.prop;
+            var ss = this.state.editable;
             ss[state] = e.target.value;
-            this.setState({ prop: ss });
+            this.setState({ editable: ss });
         }
     }, {
         key: 'getRect',
@@ -37877,10 +37884,15 @@ var Rect = exports.Rect = function (_React$Component) {
             var _this2 = this;
 
             _axios2.default.get('/rect').then(function (res) {
-                return _this2.setState({ prop: res.data }, function () {
-                    return console.log(_this2.state.prop);
-                });
+                var prop = _this2.state.prop;
+                prop.push(res.data);
+                _this2.setState({ prop: prop });
             });
+        }
+    }, {
+        key: 'down',
+        value: function down(i) {
+            console.log(i);
         }
     }, {
         key: 'componentWillMount',
@@ -37905,14 +37917,23 @@ var Rect = exports.Rect = function (_React$Component) {
                 zIndex: '999999',
                 opacity: '0.9'
             };
-            var center = {
+            var centerX = {
                 position: 'absolute',
                 padding: '1px',
                 top: '50%',
-                left: '42%',
+                width: "100%",
                 zIndex: 999999,
                 backgroundColor: 'black',
-                opacity: '0.9'
+                opacity: '0.5'
+            };
+            var centerY = {
+                position: 'absolute',
+                padding: '1px',
+                height: "100%",
+                left: '50%',
+                zIndex: 999999,
+                backgroundColor: 'black',
+                opacity: '0.5'
             };
             return _react2.default.createElement(
                 'div',
@@ -37941,7 +37962,7 @@ var Rect = exports.Rect = function (_React$Component) {
                                 ),
                                 _react2.default.createElement(_reactMaterialize.Input, {
                                     type: 'number',
-                                    value: this.state.prop.posX,
+                                    value: this.state.editable.posX,
                                     onChange: function onChange(e) {
                                         _this3.handleChange(e, 'posX');
                                     }
@@ -37957,7 +37978,7 @@ var Rect = exports.Rect = function (_React$Component) {
                                 ),
                                 _react2.default.createElement(_reactMaterialize.Input, {
                                     type: 'number',
-                                    value: this.state.prop.posY,
+                                    value: this.state.editable.posY,
                                     onChange: function onChange(e) {
                                         _this3.handleChange(e, 'posY');
                                     }
@@ -37979,7 +38000,7 @@ var Rect = exports.Rect = function (_React$Component) {
                                 ),
                                 _react2.default.createElement(_reactMaterialize.Input, {
                                     type: 'number',
-                                    value: this.state.prop.sizeX,
+                                    value: this.state.editable.sizeX,
                                     onChange: function onChange(e) {
                                         _this3.handleChange(e, 'sizeX');
                                     }
@@ -37995,7 +38016,7 @@ var Rect = exports.Rect = function (_React$Component) {
                                 ),
                                 _react2.default.createElement(_reactMaterialize.Input, {
                                     type: 'number',
-                                    value: this.state.prop.sizeY,
+                                    value: this.state.editable.sizeY,
                                     onChange: function onChange(e) {
                                         _this3.handleChange(e, 'sizeY');
                                     }
@@ -38016,7 +38037,7 @@ var Rect = exports.Rect = function (_React$Component) {
                                     'color_body'
                                 ),
                                 _react2.default.createElement(_reactMaterialize.Input, {
-                                    value: this.state.prop.color_body,
+                                    value: this.state.editable.color_body,
                                     onChange: function onChange(e) {
                                         _this3.handleChange(e, 'color_body');
                                     }
@@ -38035,7 +38056,7 @@ var Rect = exports.Rect = function (_React$Component) {
                                     'color_frame'
                                 ),
                                 _react2.default.createElement(_reactMaterialize.Input, {
-                                    value: this.state.prop.color_frame,
+                                    value: this.state.editable.color_frame,
                                     onChange: function onChange(e) {
                                         _this3.handleChange(e, 'color_frame');
                                     }
@@ -38055,7 +38076,7 @@ var Rect = exports.Rect = function (_React$Component) {
                                 ),
                                 _react2.default.createElement(_reactMaterialize.Input, {
                                     type: 'number',
-                                    value: this.state.prop.orientation,
+                                    value: this.state.editable.orientation,
                                     onChange: function onChange(e) {
                                         _this3.handleChange(e, 'orientation');
                                     }
@@ -38086,8 +38107,36 @@ var Rect = exports.Rect = function (_React$Component) {
                         _react2.default.createElement(
                             'div',
                             { className: 'col s10 background' },
-                            _react2.default.createElement('div', { style: rectangle }),
-                            _react2.default.createElement('div', { style: center })
+                            this.state.prop.map(function (item, i) {
+                                return _react2.default.createElement(
+                                    'div',
+                                    { key: i, onClick: function onClick() {
+                                            return _this3.click(i);
+                                        },
+                                        onMouseMove: function onMouseMove(i) {
+                                            return _this3.down(i.handle);
+                                        }
+                                    },
+                                    _react2.default.createElement('div', {
+
+                                        style: {
+                                            position: 'absolute',
+                                            transformOrigin: 'top left',
+                                            height: item.sizeY + 'px',
+                                            width: item.sizeX + 'px',
+                                            top: 'calc(50% + ' + item.posY + 'px',
+                                            left: 'calc(50% + ' + item.posX + 'px',
+                                            backgroundColor: '' + item.color_body,
+                                            border: '10px solid ' + item.color_frame,
+                                            transform: 'rotate(' + item.orientation + 'deg)',
+                                            zIndex: '' + i,
+                                            opacity: '0.9'
+                                        } })
+                                );
+                            }),
+                            _react2.default.createElement('div', { style: centerX }),
+                            '     ',
+                            _react2.default.createElement('div', { style: centerY })
                         )
                     )
                 )
@@ -53710,7 +53759,7 @@ exports = module.exports = __webpack_require__(210)(undefined);
 
 
 // module
-exports.push([module.i, ".map-card {\n    height: 100vh;\n}\n.map-card > .card-content {\n    padding: 0px;\n}\n.map-card-map {\n    height: calc(100vh - 85px);\n}\n.map-card-map > .card-content {\n    padding: 0px;\n}\n.no-margin {\n    margin: 0 !important;\n}\n.collection-map {\n    overflow-y: auto !important;\n    overflow-x: hidden !important;\n    height: calc(100vh - 190px) !important;\n}\n.map-col {\n    padding: 0 0px !important;\n}\n.map-col > .col {\n    padding: 0px 0px 0px 5px !important;\n}\n\nlabel {\n    height: 5px !important;\n}\n\n.map-row {\n    border-bottom: 1px solid #d0d0d0;\n}\n.map-row-prop {\n    border-bottom: 1px solid #d0d0d0;\n    margin-bottom: 5px;\n}\n.head {\n    font-size: 17px;\n    font-weight: bold;\n}\n\n.inner-prop {\n    overflow-y: auto !important;\n    overflow-x: hidden !important;\n    height: calc(100vh - 130px) !important;\n}\n\n.goToHis {\n    padding: 0 1rem;\n    margin: 3px 5px !important;\n    text-align: center;\n    display: inline-block;\n}\n\n.card {\n    margin: 0;\n}\n\n.btn-wrapper {\n    display: block;\n    text-align: center;\n}\n\n.col {\n    margin: 0;\n    padding: 0;\n}\n\ninput {\n    margin: 0 !important;\n}\n\n.background {\n    /* background-color\tSpecifies the background color to be used\t1\n    background-image\tSpecifies ONE or MORE background images to be used\t1\n    background-position\tSpecifies the position of the background images\t1\n    background-size\tSpecifies the size of the background images\t3\n    background-repeat\tSpecifies how to repeat the background images\t1\n    background-origin\tSpecifies the positioning area of the background images\t3\n    background-clip\tSpecifies the painting area of the background images\t3\n    background-attachment */\n    background-image:url(\"http://bgfons.com/uploads/notebook/notebook_texture2463.jpg\");\n    height: 100%;\n    width: 100%;\n    position: fixed;\n}\n.center {\n    padding: 15px;\n    margin: 0;\n}\n", ""]);
+exports.push([module.i, ".map-card {\n    height: 100vh;\n}\n.map-card > .card-content {\n    padding: 0px;\n}\n.map-card-map {\n    height: calc(100vh - 85px);\n}\n.map-card-map > .card-content {\n    padding: 0px;\n}\n.no-margin {\n    margin: 0 !important;\n}\n.collection-map {\n    overflow-y: auto !important;\n    overflow-x: hidden !important;\n    height: calc(100vh - 190px) !important;\n}\n.map-col {\n    padding: 0 0px !important;\n}\n.map-col > .col {\n    padding: 0px 0px 0px 5px !important;\n}\n\nlabel {\n    height: 5px !important;\n}\n\n.map-row {\n    border-bottom: 1px solid #d0d0d0;\n}\n.map-row-prop {\n    border-bottom: 1px solid #d0d0d0;\n    margin-bottom: 5px;\n}\n.head {\n    font-size: 17px;\n    font-weight: bold;\n}\n\n.inner-prop {\n    overflow-y: auto !important;\n    overflow-x: hidden !important;\n    height: calc(100vh - 130px) !important;\n}\n\n.goToHis {\n    padding: 0 1rem;\n    margin: 3px 5px !important;\n    text-align: center;\n    display: inline-block;\n}\n\n.card {\n    margin: 0;\n}\n\n.btn-wrapper {\n    display: block;\n    text-align: center;\n}\n\n.col {\n    margin: 0;\n    padding: 0;\n}\n\ninput {\n    margin: 0 !important;\n}\n\n.background {\n    padding: 0px !important;\n    /* background-color\tSpecifies the background color to be used\t1\n    background-image\tSpecifies ONE or MORE background images to be used\t1\n    background-position\tSpecifies the position of the background images\t1\n    background-size\tSpecifies the size of the background images\t3\n    background-repeat\tSpecifies how to repeat the background images\t1\n    background-origin\tSpecifies the positioning area of the background images\t3\n    background-clip\tSpecifies the painting area of the background images\t3\n    background-attachment */\n    background-image:url(\"http://bgfons.com/uploads/notebook/notebook_texture2463.jpg\");\n    height: 100%;\n    width: 100%;\n    position: fixed;\n}\n.center {\n    padding: 15px;\n    margin: 0;\n}\n", ""]);
 
 // exports
 
