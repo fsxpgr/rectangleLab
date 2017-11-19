@@ -1,5 +1,6 @@
 import React from 'react';
 import axios from 'axios';
+import ReactDOM from 'react-dom';
 
 import { Link, browserHistory } from 'react-router';
 
@@ -13,10 +14,11 @@ export class Rect extends React.Component {
         this.state = {
             prop: [],
             editable: [],
-            iteration: 200,
-            screenXdif: 0,
-            screenYdif: 0,
-            d: false
+            iteration: 0,
+            targetId: 0,
+            x: 0,
+            y: 0,
+            drag: false
         };
         this.handleChange = this.handleChange.bind(this);
         this.onDown = this.onDown.bind(this);
@@ -24,32 +26,41 @@ export class Rect extends React.Component {
     }
 
     onDown(e, i) {
-        this.setState({ screenXdif: e.screenX, screenYdif: e.screenY, d: true })
-        var temp = this.state.prop[i]
-        this.setState({ editable: temp })
+        var temp = this.state.prop;
+        var iter = this.state.iteration;
+        temp[i].zIndex = iter++;
+        temp[i].boxShadow = `rgba(0, 0, 0, 0.25) 0px 14px 28px, rgba(0, 0, 0, 0.22) 0px 10px 10px`;
 
-        var ss = this.state.prop
-        var iter = this.state.iteration
-        ss[i].zIndex = this.state.prop[i].zIndex + iter
-        iter = ss[i].zIndex++
-        this.setState({ prop: ss, iteration: iter });
+        this.setState({
+            x: e.pageX - this.state.prop[i].posX,
+            y: e.pageY - this.state.prop[i].posY,
+            drag: true,
+            editable: temp[i],
+            targetId: i,
+            iteration: iter++,
+            prop: temp
+        });
+
+        e.stopPropagation();
+        e.preventDefault();
     }
 
-    onUp(i) {
-        this.setState({ d: false })
-    }
-
-    onMouseMove(e) {
-        if (this.state.d) {
-            var X = this.state.screenXdif - e.screenX
-            var Y = this.state.screenYdif - e.screenY
-            var ss = this.state.prop
-            ss[0].posX -= X/2 //            ss[0].posY = this.state.screenYdif - Y * 4
-                    ss[0].posY -= Y/2
-            this.setState({ prop: ss })
+    onUp(e) {
+        if (this.state.drag) {
+            var temp = this.state.prop;
+            temp[this.state.targetId].boxShadow = '';
+            this.setState({ drag: false, prop: temp });
         }
     }
 
+    onMove(e) {
+        if (this.state.drag) {
+            var temp = this.state.prop;
+            temp[this.state.targetId].posX = e.pageX - this.state.x;
+            temp[this.state.targetId].posY = e.pageY - this.state.y;
+            this.setState({ prop: temp });
+        }
+    }
 
     handleChange(e, state) {
         var ss = this.state.editable;
@@ -59,12 +70,14 @@ export class Rect extends React.Component {
 
     getRect() {
         axios.get('/rect').then(res => {
-            let prop = this.state.prop
-            prop.push(res.data)
-            this.setState({ prop: prop })
+            let prop = this.state.prop;
+            let iter = this.state.iteration;
+            res.data.zIndex = iter++;
+            res.data.boxShadow = 0;
+            prop.push(res.data);
+            this.setState({ prop: prop, iteration: iter++ });
         });
     }
-
 
     componentWillMount() {
         this.getRect();
@@ -88,7 +101,7 @@ export class Rect extends React.Component {
             position: 'absolute',
             padding: '1px',
             top: '50%',
-            width: "100%",
+            width: '100%',
             zIndex: 999999,
             backgroundColor: 'black',
             opacity: `0.5`
@@ -96,12 +109,13 @@ export class Rect extends React.Component {
         const centerY = {
             position: 'absolute',
             padding: '1px',
-            height: "100%",
+            height: '100%',
             left: '50%',
             zIndex: 999999,
             backgroundColor: 'black',
             opacity: `0.5`
         };
+        let iter = this.state.iteration;
         return (
             <div className="row no-margin">
                 <div className="col s2 map-col">
@@ -193,30 +207,30 @@ export class Rect extends React.Component {
                     </Card>
                 </div>
                 <div className="col s10 map-col">
-                    <Card className="map-card " onMouseUp={(e) => this.onUp(e)} onMouseMove={this.onMouseMove.bind(this)}>
+                    <Card className="map-card " onMouseUp={e => this.onUp(e)} onMouseMove={this.onMove.bind(this)}>
                         <div className="col s10 background">
-                            {this.state.prop.map((item, i) => <div key={i}
-
-                            >
-                                <div
-
-                                    onMouseDown={(e) => this.onDown(e, i)}
-
-                                    style={{
-                                        position: 'absolute',
-                                        transformOrigin: 'top left',
-                                        height: `${item.sizeY}px`,
-                                        width: `${item.sizeX}px`,
-                                        top: `calc(50% + ${item.posY}px`,
-                                        left: `calc(50% + ${item.posX}px`,
-                                        backgroundColor: `${item.color_body}`,
-                                        border: `10px solid ${item.color_frame}`,
-                                        transform: `rotate(${item.orientation}deg)`,
-                                        zIndex: `${item.zIndex + i}`,
-                                        opacity: `0.9`
-                                    }} /></div>)}
-
-                            <div style={centerX} />     <div style={centerY} />
+                            {this.state.prop.map((item, i) => (
+                                <div key={i}>
+                                    <div
+                                        onMouseDown={e => this.onDown(e, i)}
+                                        style={{
+                                            position: 'absolute',
+                                            transformOrigin: 'top left',
+                                            height: `${item.sizeY}px`,
+                                            width: `${item.sizeX}px`,
+                                            top: `calc(50% + ${item.posY}px`,
+                                            left: `calc(50% + ${item.posX}px`,
+                                            backgroundColor: `${item.color_body}`,
+                                            border: `10px solid ${item.color_frame}`,
+                                            transform: `rotate(${item.orientation}deg)`,
+                                            zIndex: `${item.zIndex}`,
+                                            boxShadow: `${item.boxShadow}`,
+                                            opacity: `0.9`
+                                        }}
+                                    />
+                                </div>
+                            ))}
+                            <div style={centerX} /> <div style={centerY} />
                         </div>
                     </Card>
                 </div>

@@ -37827,6 +37827,10 @@ var _axios = __webpack_require__(333);
 
 var _axios2 = _interopRequireDefault(_axios);
 
+var _reactDom = __webpack_require__(213);
+
+var _reactDom2 = _interopRequireDefault(_reactDom);
+
 var _reactRouter = __webpack_require__(100);
 
 var _reactMaterialize = __webpack_require__(352);
@@ -37852,10 +37856,11 @@ var Rect = exports.Rect = function (_React$Component) {
         _this.state = {
             prop: [],
             editable: [],
-            iteration: 200,
-            screenXdif: 0,
-            screenYdif: 0,
-            d: false
+            iteration: 0,
+            targetId: 0,
+            x: 0,
+            y: 0,
+            drag: false
         };
         _this.handleChange = _this.handleChange.bind(_this);
         _this.onDown = _this.onDown.bind(_this);
@@ -37866,31 +37871,41 @@ var Rect = exports.Rect = function (_React$Component) {
     _createClass(Rect, [{
         key: 'onDown',
         value: function onDown(e, i) {
-            this.setState({ screenXdif: e.screenX, screenYdif: e.screenY, d: true });
-            var temp = this.state.prop[i];
-            this.setState({ editable: temp });
-
-            var ss = this.state.prop;
+            var temp = this.state.prop;
             var iter = this.state.iteration;
-            ss[i].zIndex = this.state.prop[i].zIndex + iter;
-            iter = ss[i].zIndex++;
-            this.setState({ prop: ss, iteration: iter });
+            temp[i].zIndex = iter++;
+            temp[i].boxShadow = 'rgba(0, 0, 0, 0.25) 0px 14px 28px, rgba(0, 0, 0, 0.22) 0px 10px 10px';
+
+            this.setState({
+                x: e.pageX - this.state.prop[i].posX,
+                y: e.pageY - this.state.prop[i].posY,
+                drag: true,
+                editable: temp[i],
+                targetId: i,
+                iteration: iter++,
+                prop: temp
+            });
+
+            e.stopPropagation();
+            e.preventDefault();
         }
     }, {
         key: 'onUp',
-        value: function onUp(i) {
-            this.setState({ d: false });
+        value: function onUp(e) {
+            if (this.state.drag) {
+                var temp = this.state.prop;
+                temp[this.state.targetId].boxShadow = '';
+                this.setState({ drag: false, prop: temp });
+            }
         }
     }, {
-        key: 'onMouseMove',
-        value: function onMouseMove(e) {
-            if (this.state.d) {
-                var X = this.state.screenXdif - e.screenX;
-                var Y = this.state.screenYdif - e.screenY;
-                var ss = this.state.prop;
-                ss[0].posX -= X / 2; //            ss[0].posY = this.state.screenYdif - Y * 4
-                ss[0].posY -= Y / 2;
-                this.setState({ prop: ss });
+        key: 'onMove',
+        value: function onMove(e) {
+            if (this.state.drag) {
+                var temp = this.state.prop;
+                temp[this.state.targetId].posX = e.pageX - this.state.x;
+                temp[this.state.targetId].posY = e.pageY - this.state.y;
+                this.setState({ prop: temp });
             }
         }
     }, {
@@ -37907,8 +37922,11 @@ var Rect = exports.Rect = function (_React$Component) {
 
             _axios2.default.get('/rect').then(function (res) {
                 var prop = _this2.state.prop;
+                var iter = _this2.state.iteration;
+                res.data.zIndex = iter++;
+                res.data.boxShadow = 0;
                 prop.push(res.data);
-                _this2.setState({ prop: prop });
+                _this2.setState({ prop: prop, iteration: iter++ });
             });
         }
     }, {
@@ -37938,7 +37956,7 @@ var Rect = exports.Rect = function (_React$Component) {
                 position: 'absolute',
                 padding: '1px',
                 top: '50%',
-                width: "100%",
+                width: '100%',
                 zIndex: 999999,
                 backgroundColor: 'black',
                 opacity: '0.5'
@@ -37946,12 +37964,13 @@ var Rect = exports.Rect = function (_React$Component) {
             var centerY = {
                 position: 'absolute',
                 padding: '1px',
-                height: "100%",
+                height: '100%',
                 left: '50%',
                 zIndex: 999999,
                 backgroundColor: 'black',
                 opacity: '0.5'
             };
+            var iter = this.state.iteration;
             return _react2.default.createElement(
                 'div',
                 { className: 'row no-margin' },
@@ -38122,22 +38141,18 @@ var Rect = exports.Rect = function (_React$Component) {
                         _reactMaterialize.Card,
                         { className: 'map-card ', onMouseUp: function onMouseUp(e) {
                                 return _this3.onUp(e);
-                            }, onMouseMove: this.onMouseMove.bind(this) },
+                            }, onMouseMove: this.onMove.bind(this) },
                         _react2.default.createElement(
                             'div',
                             { className: 'col s10 background' },
                             this.state.prop.map(function (item, i) {
                                 return _react2.default.createElement(
                                     'div',
-                                    { key: i
-
-                                    },
+                                    { key: i },
                                     _react2.default.createElement('div', {
-
                                         onMouseDown: function onMouseDown(e) {
                                             return _this3.onDown(e, i);
                                         },
-
                                         style: {
                                             position: 'absolute',
                                             transformOrigin: 'top left',
@@ -38148,13 +38163,15 @@ var Rect = exports.Rect = function (_React$Component) {
                                             backgroundColor: '' + item.color_body,
                                             border: '10px solid ' + item.color_frame,
                                             transform: 'rotate(' + item.orientation + 'deg)',
-                                            zIndex: '' + (item.zIndex + i),
+                                            zIndex: '' + item.zIndex,
+                                            boxShadow: '' + item.boxShadow,
                                             opacity: '0.9'
-                                        } })
+                                        }
+                                    })
                                 );
                             }),
                             _react2.default.createElement('div', { style: centerX }),
-                            '     ',
+                            ' ',
                             _react2.default.createElement('div', { style: centerY })
                         )
                     )
@@ -53778,7 +53795,7 @@ exports = module.exports = __webpack_require__(210)(undefined);
 
 
 // module
-exports.push([module.i, ".map-card {\r\n    height: 100vh;\r\n}\r\n.map-card > .card-content {\r\n    padding: 0px;\r\n}\r\n.map-card-map {\r\n    height: calc(100vh - 85px);\r\n}\r\n.map-card-map > .card-content {\r\n    padding: 0px;\r\n}\r\n.no-margin {\r\n    margin: 0 !important;\r\n}\r\n.collection-map {\r\n    overflow-y: auto !important;\r\n    overflow-x: hidden !important;\r\n    height: calc(100vh - 190px) !important;\r\n}\r\n.map-col {\r\n    padding: 0 0px !important;\r\n}\r\n.map-col > .col {\r\n    padding: 0px 0px 0px 5px !important;\r\n}\r\n\r\nlabel {\r\n    height: 5px !important;\r\n}\r\n\r\n.map-row {\r\n    border-bottom: 1px solid #d0d0d0;\r\n}\r\n.map-row-prop {\r\n    border-bottom: 1px solid #d0d0d0;\r\n    margin-bottom: 5px;\r\n}\r\n.head {\r\n    font-size: 17px;\r\n    font-weight: bold;\r\n}\r\n\r\n.inner-prop {\r\n    overflow-y: auto !important;\r\n    overflow-x: hidden !important;\r\n    height: calc(100vh - 130px) !important;\r\n}\r\n\r\n.goToHis {\r\n    padding: 0 1rem;\r\n    margin: 3px 5px !important;\r\n    text-align: center;\r\n    display: inline-block;\r\n}\r\n\r\n.card {\r\n    margin: 0;\r\n}\r\n\r\n.btn-wrapper {\r\n    display: block;\r\n    text-align: center;\r\n}\r\n\r\n.col {\r\n    margin: 0;\r\n    padding: 0;\r\n}\r\n\r\ninput {\r\n    margin: 0 !important;\r\n}\r\n\r\n.background {\r\n    padding: 0px !important;\r\n    /* background-color\tSpecifies the background color to be used\t1\r\n    background-image\tSpecifies ONE or MORE background images to be used\t1\r\n    background-position\tSpecifies the position of the background images\t1\r\n    background-size\tSpecifies the size of the background images\t3\r\n    background-repeat\tSpecifies how to repeat the background images\t1\r\n    background-origin\tSpecifies the positioning area of the background images\t3\r\n    background-clip\tSpecifies the painting area of the background images\t3\r\n    background-attachment */\r\n    background-image:url(\"http://bgfons.com/uploads/notebook/notebook_texture2463.jpg\");\r\n    height: 100%;\r\n    width: 100%;\r\n    position: fixed;\r\n}\r\n.center {\r\n    padding: 15px;\r\n    margin: 0;\r\n}\r\n", ""]);
+exports.push([module.i, ".map-card {\n    height: 100vh;\n}\n.map-card > .card-content {\n    padding: 0px;\n}\n.map-card-map {\n    height: calc(100vh - 85px);\n}\n.map-card-map > .card-content {\n    padding: 0px;\n}\n.no-margin {\n    margin: 0 !important;\n}\n.collection-map {\n    overflow-y: auto !important;\n    overflow-x: hidden !important;\n    height: calc(100vh - 190px) !important;\n}\n.map-col {\n    padding: 0 0px !important;\n}\n.map-col > .col {\n    padding: 0px 0px 0px 5px !important;\n}\n\nlabel {\n    height: 5px !important;\n}\n\n.map-row {\n    border-bottom: 1px solid #d0d0d0;\n}\n.map-row-prop {\n    border-bottom: 1px solid #d0d0d0;\n    margin-bottom: 5px;\n}\n.head {\n    font-size: 17px;\n    font-weight: bold;\n}\n\n.inner-prop {\n    overflow-y: auto !important;\n    overflow-x: hidden !important;\n    height: calc(100vh - 130px) !important;\n}\n\n.goToHis {\n    padding: 0 1rem;\n    margin: 3px 5px !important;\n    text-align: center;\n    display: inline-block;\n}\n\n.card {\n    margin: 0;\n}\n\n.btn-wrapper {\n    display: block;\n    text-align: center;\n}\n\n.col {\n    margin: 0;\n    padding: 0;\n}\n\ninput {\n    margin: 0 !important;\n}\n\n.background {\n    padding: 0px !important;\n    /* background-color\tSpecifies the background color to be used\t1\n    background-image\tSpecifies ONE or MORE background images to be used\t1\n    background-position\tSpecifies the position of the background images\t1\n    background-size\tSpecifies the size of the background images\t3\n    background-repeat\tSpecifies how to repeat the background images\t1\n    background-origin\tSpecifies the positioning area of the background images\t3\n    background-clip\tSpecifies the painting area of the background images\t3\n    background-attachment */\n    background-image:url(\"http://bgfons.com/uploads/notebook/notebook_texture2463.jpg\");\n    height: 100%;\n    width: 100%;\n    position: fixed;\n}\n.center {\n    padding: 15px;\n    margin: 0;\n}\n", ""]);
 
 // exports
 
@@ -53918,7 +53935,7 @@ exports = module.exports = __webpack_require__(210)(undefined);
 
 
 // module
-exports.push([module.i, ".center {\r\n    text-align: center;\r\n}\r\n\r\n.inline {\r\n    display: inline-block;\r\n}\r\n\r\n.button a {\r\n    color: white;\r\n}\r\n.main_width {\r\n    width: 180px;\r\n}\r\n.btn {\r\n    margin: 10px;\r\n}\r\n", ""]);
+exports.push([module.i, ".center {\n    text-align: center;\n}\n\n.inline {\n    display: inline-block;\n}\n\n.button a {\n    color: white;\n}\n.main_width {\n    width: 180px;\n}\n.btn {\n    margin: 10px;\n}\n", ""]);
 
 // exports
 
