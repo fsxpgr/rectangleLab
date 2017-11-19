@@ -20,6 +20,7 @@ router.get('/rect', (req, res) => {
         color_frame: getRandomRGB(),
         posX: getRandomInt(-200, 200),
         posY: getRandomInt(-150, 150),
-        orientation: getRandomInt(0, 360)
+        orientation: getRandomInt(0, 360),
+        zIndex:1
     });
 });

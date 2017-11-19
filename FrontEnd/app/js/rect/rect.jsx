@@ -11,68 +11,84 @@ export class Rect extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            prop:[],
-            editable:[]
+            prop: [],
+            editable: [],
+            iteration: 200,
+            screenXdif: 0,
+            screenYdif: 0,
+            d: false
         };
         this.handleChange = this.handleChange.bind(this);
-        this.click = this.click.bind(this);
-        this.down = this.down.bind(this);
+        this.onDown = this.onDown.bind(this);
+        this.onUp = this.onUp.bind(this);
     }
 
-    click(i){
+    onDown(e, i) {
+        this.setState({ screenXdif: e.screenX, screenYdif: e.screenY, d: true })
         var temp = this.state.prop[i]
-        temp.zIndex="999999999" + i
-        this.setState({temp:temp})
-        this.setState({editable:temp})
+        this.setState({ editable: temp })
 
-
-
-
-        var ss = this.state.prop[i];
-        ss["zIndex"] = 99999
-        this.setState({ prop: ss });
+        var ss = this.state.prop
+        var iter = this.state.iteration
+        ss[i].zIndex = this.state.prop[i].zIndex + iter
+        iter = ss[i].zIndex++
+        this.setState({ prop: ss, iteration: iter });
     }
+
+    onUp(i) {
+        this.setState({ d: false })
+    }
+
+    onMouseMove(e) {
+        if (this.state.d) {
+            var X = this.state.screenXdif - e.screenX
+            var Y = this.state.screenYdif - e.screenY
+            var ss = this.state.prop
+            ss[0].posX -= X/2 //            ss[0].posY = this.state.screenYdif - Y * 4
+                    ss[0].posY -= Y/2
+            this.setState({ prop: ss })
+        }
+    }
+
 
     handleChange(e, state) {
         var ss = this.state.editable;
         ss[state] = e.target.value;
         this.setState({ editable: ss });
     }
-    
+
     getRect() {
         axios.get('/rect').then(res => {
-let prop = this.state.prop
-prop.push(res.data)
+            let prop = this.state.prop
+            prop.push(res.data)
             this.setState({ prop: prop })
         });
     }
 
-    down(i){
-console.log(i)
-    }
+
     componentWillMount() {
         this.getRect();
     }
 
     render() {
-        const rectangle = {
-            position: 'absolute',
-            transformOrigin: 'top left',
-            height: `${this.state.prop.sizeY}px`,
-            width: `${this.state.prop.sizeX}px`,
-            top: `calc(50% + ${this.state.prop.posY}px`,
-            left: `calc(42% + ${this.state.prop.posX}px`,
-            backgroundColor: `${this.state.prop.color_body}`,
-            border: `10px solid ${this.state.prop.color_frame}`,
-            transform: `rotate(${this.state.prop.orientation}deg)`,
-            zIndex: `999999`,
-            opacity: `0.9`
-        };
+        //   const rectangle = {
+        //position: 'absolute',
+        //transformOrigin: 'top left',
+        //  height: `${this.state.prop.sizeY}px`,
+        //      width: `${this.state.prop.sizeX}px`,
+        //    top: `calc(50% + ${this.state.prop.posY}px`,
+        //        left: `calc(42% + ${this.state.prop.posX}px`,
+        //  backgroundColor: `${this.state.prop.color_body}`,
+        //border: `10px solid ${this.state.prop.color_frame}`,
+        //      transform: `rotate(${this.state.prop.orientation}deg)`,
+        //    zIndex: `999999`,
+        //        opacity: `0.9`
+        //     };
         const centerX = {
             position: 'absolute',
             padding: '1px',
             top: '50%',
-            width:"100%",
+            width: "100%",
             zIndex: 999999,
             backgroundColor: 'black',
             opacity: `0.5`
@@ -80,7 +96,7 @@ console.log(i)
         const centerY = {
             position: 'absolute',
             padding: '1px',
-            height:"100%",
+            height: "100%",
             left: '50%',
             zIndex: 999999,
             backgroundColor: 'black',
@@ -177,29 +193,30 @@ console.log(i)
                     </Card>
                 </div>
                 <div className="col s10 map-col">
-                    <Card className="map-card ">
+                    <Card className="map-card " onMouseUp={(e) => this.onUp(e)} onMouseMove={this.onMouseMove.bind(this)}>
                         <div className="col s10 background">
-                        {this.state.prop.map((item, i)=><div key={i} onClick={()=>this.click(i)                        } 
-                        onMouseMove={(i)=>this.down(i.handle)}
-                        >
-                            <div 
-                        
-                        
-                        style={{
-            position: 'absolute',
-            transformOrigin: 'top left',
-            height: `${item.sizeY}px`,
-            width: `${item.sizeX}px`,
-            top: `calc(50% + ${item.posY}px`,
-            left: `calc(50% + ${item.posX}px`,
-            backgroundColor: `${item.color_body}`,
-            border: `10px solid ${item.color_frame}`,
-            transform: `rotate(${item.orientation}deg)`,
-            zIndex: `${i}`,
-            opacity: `0.9`
-        }} /></div>)}
-                           
-                           <div style={centerX} />     <div style={centerY} />
+                            {this.state.prop.map((item, i) => <div key={i}
+
+                            >
+                                <div
+
+                                    onMouseDown={(e) => this.onDown(e, i)}
+
+                                    style={{
+                                        position: 'absolute',
+                                        transformOrigin: 'top left',
+                                        height: `${item.sizeY}px`,
+                                        width: `${item.sizeX}px`,
+                                        top: `calc(50% + ${item.posY}px`,
+                                        left: `calc(50% + ${item.posX}px`,
+                                        backgroundColor: `${item.color_body}`,
+                                        border: `10px solid ${item.color_frame}`,
+                                        transform: `rotate(${item.orientation}deg)`,
+                                        zIndex: `${item.zIndex + i}`,
+                                        opacity: `0.9`
+                                    }} /></div>)}
+
+                            <div style={centerX} />     <div style={centerY} />
                         </div>
                     </Card>
                 </div>

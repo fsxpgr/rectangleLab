@@ -37851,25 +37851,47 @@ var Rect = exports.Rect = function (_React$Component) {
 
         _this.state = {
             prop: [],
-            editable: []
+            editable: [],
+            iteration: 200,
+            screenXdif: 0,
+            screenYdif: 0,
+            d: false
         };
         _this.handleChange = _this.handleChange.bind(_this);
-        _this.click = _this.click.bind(_this);
-        _this.down = _this.down.bind(_this);
+        _this.onDown = _this.onDown.bind(_this);
+        _this.onUp = _this.onUp.bind(_this);
         return _this;
     }
 
     _createClass(Rect, [{
-        key: 'click',
-        value: function click(i) {
+        key: 'onDown',
+        value: function onDown(e, i) {
+            this.setState({ screenXdif: e.screenX, screenYdif: e.screenY, d: true });
             var temp = this.state.prop[i];
-            temp.zIndex = "999999999" + i;
-            this.setState({ temp: temp });
             this.setState({ editable: temp });
 
-            var ss = this.state.prop[i];
-            ss["zIndex"] = 99999;
-            this.setState({ prop: ss });
+            var ss = this.state.prop;
+            var iter = this.state.iteration;
+            ss[i].zIndex = this.state.prop[i].zIndex + iter;
+            iter = ss[i].zIndex++;
+            this.setState({ prop: ss, iteration: iter });
+        }
+    }, {
+        key: 'onUp',
+        value: function onUp(i) {
+            this.setState({ d: false });
+        }
+    }, {
+        key: 'onMouseMove',
+        value: function onMouseMove(e) {
+            if (this.state.d) {
+                var X = this.state.screenXdif - e.screenX;
+                var Y = this.state.screenYdif - e.screenY;
+                var ss = this.state.prop;
+                ss[0].posX -= X / 2; //            ss[0].posY = this.state.screenYdif - Y * 4
+                ss[0].posY -= Y / 2;
+                this.setState({ prop: ss });
+            }
         }
     }, {
         key: 'handleChange',
@@ -37890,11 +37912,6 @@ var Rect = exports.Rect = function (_React$Component) {
             });
         }
     }, {
-        key: 'down',
-        value: function down(i) {
-            console.log(i);
-        }
-    }, {
         key: 'componentWillMount',
         value: function componentWillMount() {
             this.getRect();
@@ -37904,19 +37921,19 @@ var Rect = exports.Rect = function (_React$Component) {
         value: function render() {
             var _this3 = this;
 
-            var rectangle = {
-                position: 'absolute',
-                transformOrigin: 'top left',
-                height: this.state.prop.sizeY + 'px',
-                width: this.state.prop.sizeX + 'px',
-                top: 'calc(50% + ' + this.state.prop.posY + 'px',
-                left: 'calc(42% + ' + this.state.prop.posX + 'px',
-                backgroundColor: '' + this.state.prop.color_body,
-                border: '10px solid ' + this.state.prop.color_frame,
-                transform: 'rotate(' + this.state.prop.orientation + 'deg)',
-                zIndex: '999999',
-                opacity: '0.9'
-            };
+            //   const rectangle = {
+            //position: 'absolute',
+            //transformOrigin: 'top left',
+            //  height: `${this.state.prop.sizeY}px`,
+            //      width: `${this.state.prop.sizeX}px`,
+            //    top: `calc(50% + ${this.state.prop.posY}px`,
+            //        left: `calc(42% + ${this.state.prop.posX}px`,
+            //  backgroundColor: `${this.state.prop.color_body}`,
+            //border: `10px solid ${this.state.prop.color_frame}`,
+            //      transform: `rotate(${this.state.prop.orientation}deg)`,
+            //    zIndex: `999999`,
+            //        opacity: `0.9`
+            //     };
             var centerX = {
                 position: 'absolute',
                 padding: '1px',
@@ -38103,21 +38120,23 @@ var Rect = exports.Rect = function (_React$Component) {
                     { className: 'col s10 map-col' },
                     _react2.default.createElement(
                         _reactMaterialize.Card,
-                        { className: 'map-card ' },
+                        { className: 'map-card ', onMouseUp: function onMouseUp(e) {
+                                return _this3.onUp(e);
+                            }, onMouseMove: this.onMouseMove.bind(this) },
                         _react2.default.createElement(
                             'div',
                             { className: 'col s10 background' },
                             this.state.prop.map(function (item, i) {
                                 return _react2.default.createElement(
                                     'div',
-                                    { key: i, onClick: function onClick() {
-                                            return _this3.click(i);
-                                        },
-                                        onMouseMove: function onMouseMove(i) {
-                                            return _this3.down(i.handle);
-                                        }
+                                    { key: i
+
                                     },
                                     _react2.default.createElement('div', {
+
+                                        onMouseDown: function onMouseDown(e) {
+                                            return _this3.onDown(e, i);
+                                        },
 
                                         style: {
                                             position: 'absolute',
@@ -38129,7 +38148,7 @@ var Rect = exports.Rect = function (_React$Component) {
                                             backgroundColor: '' + item.color_body,
                                             border: '10px solid ' + item.color_frame,
                                             transform: 'rotate(' + item.orientation + 'deg)',
-                                            zIndex: '' + i,
+                                            zIndex: '' + (item.zIndex + i),
                                             opacity: '0.9'
                                         } })
                                 );
@@ -53759,7 +53778,7 @@ exports = module.exports = __webpack_require__(210)(undefined);
 
 
 // module
-exports.push([module.i, ".map-card {\n    height: 100vh;\n}\n.map-card > .card-content {\n    padding: 0px;\n}\n.map-card-map {\n    height: calc(100vh - 85px);\n}\n.map-card-map > .card-content {\n    padding: 0px;\n}\n.no-margin {\n    margin: 0 !important;\n}\n.collection-map {\n    overflow-y: auto !important;\n    overflow-x: hidden !important;\n    height: calc(100vh - 190px) !important;\n}\n.map-col {\n    padding: 0 0px !important;\n}\n.map-col > .col {\n    padding: 0px 0px 0px 5px !important;\n}\n\nlabel {\n    height: 5px !important;\n}\n\n.map-row {\n    border-bottom: 1px solid #d0d0d0;\n}\n.map-row-prop {\n    border-bottom: 1px solid #d0d0d0;\n    margin-bottom: 5px;\n}\n.head {\n    font-size: 17px;\n    font-weight: bold;\n}\n\n.inner-prop {\n    overflow-y: auto !important;\n    overflow-x: hidden !important;\n    height: calc(100vh - 130px) !important;\n}\n\n.goToHis {\n    padding: 0 1rem;\n    margin: 3px 5px !important;\n    text-align: center;\n    display: inline-block;\n}\n\n.card {\n    margin: 0;\n}\n\n.btn-wrapper {\n    display: block;\n    text-align: center;\n}\n\n.col {\n    margin: 0;\n    padding: 0;\n}\n\ninput {\n    margin: 0 !important;\n}\n\n.background {\n    padding: 0px !important;\n    /* background-color\tSpecifies the background color to be used\t1\n    background-image\tSpecifies ONE or MORE background images to be used\t1\n    background-position\tSpecifies the position of the background images\t1\n    background-size\tSpecifies the size of the background images\t3\n    background-repeat\tSpecifies how to repeat the background images\t1\n    background-origin\tSpecifies the positioning area of the background images\t3\n    background-clip\tSpecifies the painting area of the background images\t3\n    background-attachment */\n    background-image:url(\"http://bgfons.com/uploads/notebook/notebook_texture2463.jpg\");\n    height: 100%;\n    width: 100%;\n    position: fixed;\n}\n.center {\n    padding: 15px;\n    margin: 0;\n}\n", ""]);
+exports.push([module.i, ".map-card {\r\n    height: 100vh;\r\n}\r\n.map-card > .card-content {\r\n    padding: 0px;\r\n}\r\n.map-card-map {\r\n    height: calc(100vh - 85px);\r\n}\r\n.map-card-map > .card-content {\r\n    padding: 0px;\r\n}\r\n.no-margin {\r\n    margin: 0 !important;\r\n}\r\n.collection-map {\r\n    overflow-y: auto !important;\r\n    overflow-x: hidden !important;\r\n    height: calc(100vh - 190px) !important;\r\n}\r\n.map-col {\r\n    padding: 0 0px !important;\r\n}\r\n.map-col > .col {\r\n    padding: 0px 0px 0px 5px !important;\r\n}\r\n\r\nlabel {\r\n    height: 5px !important;\r\n}\r\n\r\n.map-row {\r\n    border-bottom: 1px solid #d0d0d0;\r\n}\r\n.map-row-prop {\r\n    border-bottom: 1px solid #d0d0d0;\r\n    margin-bottom: 5px;\r\n}\r\n.head {\r\n    font-size: 17px;\r\n    font-weight: bold;\r\n}\r\n\r\n.inner-prop {\r\n    overflow-y: auto !important;\r\n    overflow-x: hidden !important;\r\n    height: calc(100vh - 130px) !important;\r\n}\r\n\r\n.goToHis {\r\n    padding: 0 1rem;\r\n    margin: 3px 5px !important;\r\n    text-align: center;\r\n    display: inline-block;\r\n}\r\n\r\n.card {\r\n    margin: 0;\r\n}\r\n\r\n.btn-wrapper {\r\n    display: block;\r\n    text-align: center;\r\n}\r\n\r\n.col {\r\n    margin: 0;\r\n    padding: 0;\r\n}\r\n\r\ninput {\r\n    margin: 0 !important;\r\n}\r\n\r\n.background {\r\n    padding: 0px !important;\r\n    /* background-color\tSpecifies the background color to be used\t1\r\n    background-image\tSpecifies ONE or MORE background images to be used\t1\r\n    background-position\tSpecifies the position of the background images\t1\r\n    background-size\tSpecifies the size of the background images\t3\r\n    background-repeat\tSpecifies how to repeat the background images\t1\r\n    background-origin\tSpecifies the positioning area of the background images\t3\r\n    background-clip\tSpecifies the painting area of the background images\t3\r\n    background-attachment */\r\n    background-image:url(\"http://bgfons.com/uploads/notebook/notebook_texture2463.jpg\");\r\n    height: 100%;\r\n    width: 100%;\r\n    position: fixed;\r\n}\r\n.center {\r\n    padding: 15px;\r\n    margin: 0;\r\n}\r\n", ""]);
 
 // exports
 
@@ -53899,7 +53918,7 @@ exports = module.exports = __webpack_require__(210)(undefined);
 
 
 // module
-exports.push([module.i, ".center {\n    text-align: center;\n}\n\n.inline {\n    display: inline-block;\n}\n\n.button a {\n    color: white;\n}\n.main_width {\n    width: 180px;\n}\n.btn {\n    margin: 10px;\n}\n", ""]);
+exports.push([module.i, ".center {\r\n    text-align: center;\r\n}\r\n\r\n.inline {\r\n    display: inline-block;\r\n}\r\n\r\n.button a {\r\n    color: white;\r\n}\r\n.main_width {\r\n    width: 180px;\r\n}\r\n.btn {\r\n    margin: 10px;\r\n}\r\n", ""]);
 
 // exports
 
