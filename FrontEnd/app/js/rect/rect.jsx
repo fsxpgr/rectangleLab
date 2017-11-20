@@ -29,7 +29,9 @@ export class Rect extends React.Component {
         var temp = this.state.prop;
         var iter = this.state.iteration;
         temp[i].zIndex = iter++;
-        temp[i].boxShadow = `rgba(0, 0, 0, 0.25) 0px 14px 28px, rgba(0, 0, 0, 0.22) 0px 10px 10px`;
+        let hor = Math.sin(temp[i].orientation * (Math.PI / 180))*12
+        let ver = Math.cos(temp[i].orientation * (Math.PI / 180))*12
+        temp[i].boxShadow = `${hor}px ${ver}px 14px rgba(0, 0, 0, 0.25) `;
 
         this.setState({
             x: e.pageX - this.state.prop[i].posX,
@@ -84,19 +86,7 @@ export class Rect extends React.Component {
     }
 
     render() {
-        //   const rectangle = {
-        //position: 'absolute',
-        //transformOrigin: 'top left',
-        //  height: `${this.state.prop.sizeY}px`,
-        //      width: `${this.state.prop.sizeX}px`,
-        //    top: `calc(50% + ${this.state.prop.posY}px`,
-        //        left: `calc(42% + ${this.state.prop.posX}px`,
-        //  backgroundColor: `${this.state.prop.color_body}`,
-        //border: `10px solid ${this.state.prop.color_frame}`,
-        //      transform: `rotate(${this.state.prop.orientation}deg)`,
-        //    zIndex: `999999`,
-        //        opacity: `0.9`
-        //     };
+
         const centerX = {
             position: 'absolute',
             padding: '1px',
@@ -104,7 +94,8 @@ export class Rect extends React.Component {
             width: '100%',
             zIndex: 999999,
             backgroundColor: 'black',
-            opacity: `0.5`
+            opacity: `0.5`,
+            pointerEvents: `none`
         };
         const centerY = {
             position: 'absolute',
@@ -113,9 +104,10 @@ export class Rect extends React.Component {
             left: '50%',
             zIndex: 999999,
             backgroundColor: 'black',
-            opacity: `0.5`
+            opacity: `0.5`,
+            pointerEvents: `none`
         };
-        let iter = this.state.iteration;
+
         return (
             <div className="row no-margin">
                 <div className="col s2 map-col">
