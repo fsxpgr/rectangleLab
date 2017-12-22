@@ -20,17 +20,21 @@ export class Rect extends React.Component {
             y: 0,
             drag: false
         };
+        // binding mause events
         this.handleChange = this.handleChange.bind(this);
         this.onDown = this.onDown.bind(this);
         this.onUp = this.onUp.bind(this);
     }
 
+    // mouse event handler
     onDown(e, i) {
         var temp = this.state.prop;
         var iter = this.state.iteration;
         temp[i].zIndex = iter++;
-        let hor = Math.sin(temp[i].orientation * (Math.PI / 180))*12
-        let ver = Math.cos(temp[i].orientation * (Math.PI / 180))*12
+
+        //calculating of shadowbox
+        let hor = Math.sin(temp[i].orientation * (Math.PI / 180)) * 12;
+        let ver = Math.cos(temp[i].orientation * (Math.PI / 180)) * 12;
         temp[i].boxShadow = `${hor}px ${ver}px 14px rgba(0, 0, 0, 0.25) `;
 
         this.setState({
@@ -47,6 +51,7 @@ export class Rect extends React.Component {
         e.preventDefault();
     }
 
+    // mouse event handler
     onUp(e) {
         if (this.state.drag) {
             var temp = this.state.prop;
@@ -55,6 +60,7 @@ export class Rect extends React.Component {
         }
     }
 
+    // mouse event handler
     onMove(e) {
         if (this.state.drag) {
             var temp = this.state.prop;
@@ -65,12 +71,14 @@ export class Rect extends React.Component {
     }
 
     handleChange(e, state) {
+        // handling inputs
         var ss = this.state.editable;
         ss[state] = e.target.value;
         this.setState({ editable: ss });
     }
 
     getRect() {
+        //getting random rectangle from server
         axios.get('/rect').then(res => {
             let prop = this.state.prop;
             let iter = this.state.iteration;
@@ -86,7 +94,7 @@ export class Rect extends React.Component {
     }
 
     render() {
-
+        //rendering X and Y axis
         const centerX = {
             position: 'absolute',
             padding: '1px',
@@ -111,6 +119,7 @@ export class Rect extends React.Component {
         return (
             <div className="row no-margin">
                 <div className="col s2 map-col">
+                    {/* card of inputs for edit rectangles */}
                     <Card className="map-card">
                         <h5 className="center">Edit rectangle</h5>
                         <Row>
@@ -201,8 +210,10 @@ export class Rect extends React.Component {
                 <div className="col s10 map-col">
                     <Card className="map-card " onMouseUp={e => this.onUp(e)} onMouseMove={this.onMove.bind(this)}>
                         <div className="col s10 background">
+                            {/* mapping all state to render rectangles */}
                             {this.state.prop.map((item, i) => (
                                 <div key={i}>
+                                    {/* rectangle div */}
                                     <div
                                         onMouseDown={e => this.onDown(e, i)}
                                         style={{
@@ -222,6 +233,7 @@ export class Rect extends React.Component {
                                     />
                                 </div>
                             ))}
+                            {/* axis X and Y */}
                             <div style={centerX} /> <div style={centerY} />
                         </div>
                     </Card>
